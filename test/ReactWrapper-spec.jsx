@@ -3567,4 +3567,33 @@ describeWithDOM('mount', () => {
       });
     });
   });
+
+  describe('out-of-band state updates', () => {
+    class Child extends React.Component {
+      render() {
+        return <span />;
+      }
+    }
+
+    class Test extends React.Component {
+      callbackSetState() {
+        this.setState({ showSpan: true });
+      }
+
+      render() {
+        return (
+          <div>
+            {this.state && this.state.showSpan && <span className="show-me" />}
+            <Child callback={() => this.callbackSetState()} />
+          </div>
+        );
+      }
+    }
+
+    it('should have updated output after child prop callback invokes setState', () => {
+      const wrapper = mount(<Test />);
+      wrapper.find(Child).props().callback();
+      expect(wrapper.find('.show-me').length).to.equal(1);
+    });
+  });
 });
